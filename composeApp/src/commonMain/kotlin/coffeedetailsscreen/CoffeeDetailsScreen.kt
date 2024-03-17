@@ -1,0 +1,186 @@
+package coffeedetailsscreen
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.Button
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.lifecycle.LifecycleEffect
+import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import data.Coffee
+import data.Recipe
+import domain.CoffeeRepositoryImpl
+import kotlin.math.round
+
+class CoffeeDetailsScreen(
+    private val coffee: Coffee
+) : Screen {
+    @Composable
+    override fun Content() {
+        val screenModel = rememberScreenModel {
+            CoffeeDetailsScreenModel(
+                coffee = coffee,
+                repository = CoffeeRepositoryImpl
+            )
+        }
+        val recipeList by screenModel.getRecipes().collectAsState()
+        val navigator = LocalNavigator.currentOrThrow
+
+        LifecycleEffect(
+            onStarted = { screenModel.onStart() }
+        )
+
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = coffee.title,
+                            style = MaterialTheme.typography.h5
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                navigator.pop()
+                            }
+                        ) {
+                            Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    }
+                )
+            },
+            bottomBar = {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Button(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        onClick = {
+                            // TODO: add new recipe
+                        }
+                    ) {
+                        Text(
+                            text = "Add new recipe",
+                            style = MaterialTheme.typography.h6
+                        )
+                    }
+                }
+            }
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().background(
+                    color = MaterialTheme.colors.surface
+                ),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(
+                    horizontal = 24.dp
+                )
+            ) {
+                item {
+                    Text(
+                        modifier = Modifier.padding(
+                            top = 16.dp,
+                        ),
+                        text = "Origin: ${coffee.origin}",
+                        style = MaterialTheme.typography.h6
+                    )
+                    Text(
+                        modifier = Modifier.padding(
+                            vertical = 16.dp,
+                        ),
+                        text = "Roaster: ${coffee.roaster}",
+                        style = MaterialTheme.typography.h6
+                    )
+                }
+                item {
+                    Text(
+                        modifier = Modifier.padding(
+                            vertical = 20.dp,
+                        ),
+                        text = "Recipes:",
+                        style = MaterialTheme.typography.h5
+                    )
+                    Divider(color = MaterialTheme.colors.primary)
+                }
+                itemsIndexed(recipeList) { index, recipe ->
+                    RecipeRow(recipe = recipe)
+                    if (index < recipeList.lastIndex) {
+                        Divider()
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun RecipeRow(recipe: Recipe) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                modifier = Modifier.padding(
+                    vertical = 16.dp
+                )
+            ) {
+                Text(
+                    text = "Temperature: ${recipe.temperature}",
+                    style = MaterialTheme.typography.subtitle1
+                )
+                Text(
+                    modifier = Modifier.padding(
+                        top = 8.dp
+                    ),
+                    text = "Water Amount: ${recipe.waterAmountMilligrams / 1000} g",
+                    style = MaterialTheme.typography.subtitle1
+                )
+                Text(
+                    modifier = Modifier.padding(
+                        top = 8.dp
+                    ),
+                    text = "Coffee Amount: ${recipe.weightMilligrams / 1000} g",
+                    style = MaterialTheme.typography.subtitle1
+                )
+                Text(
+                    modifier = Modifier.padding(
+                        top = 8.dp
+                    ),
+                    text = "Grind Setting: ${recipe.grindSize}",
+                    style = MaterialTheme.typography.subtitle1
+                )
+            }
+            Text(
+                text = "Rating: ${round(recipe.rating / 10.0)}",
+                style = MaterialTheme.typography.subtitle1
+            )
+        }
+    }
+}
