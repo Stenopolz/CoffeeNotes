@@ -2,6 +2,7 @@ package homescreen
 
 import addcoffeescreen.AddCoffeeScreen
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,8 +10,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Button
+import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -26,6 +28,8 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import coffeedetailsscreen.CoffeeDetailsScreen
+import data.Coffee
 import domain.CoffeeRepositoryImpl
 
 object HomeScreen : Screen {
@@ -75,31 +79,46 @@ object HomeScreen : Screen {
                 ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(coffeeList) { coffee ->
-                    Column(
-                        modifier = Modifier.padding(
-                            horizontal = 24.dp,
-                            vertical = 16.dp
-                        )
-                    ) {
-                        Text(
-                            text = coffee.title,
-                            style = MaterialTheme.typography.h6
-                        )
-                        Text(
-                            modifier = Modifier.padding(
-                                vertical = 8.dp
-                            ),
-                            text = coffee.origin,
-                            style = MaterialTheme.typography.subtitle1
-                        )
-                        Text(
-                            text = coffee.roaster,
-                            style = MaterialTheme.typography.subtitle1
-                        )
+                itemsIndexed(coffeeList) { index, coffee ->
+                    CoffeeRow(coffee) {
+                        navigator push CoffeeDetailsScreen(coffee)
+                    }
+                    if (index < coffeeList.lastIndex) {
+                        Divider()
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun CoffeeRow(
+        coffee: Coffee,
+        onClick: () -> Unit,
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(
+                    horizontal = 24.dp,
+                    vertical = 16.dp
+                )
+                .clickable(onClick = onClick),
+        ) {
+            Text(
+                text = coffee.title,
+                style = MaterialTheme.typography.h6
+            )
+            Text(
+                modifier = Modifier.padding(
+                    vertical = 8.dp
+                ),
+                text = coffee.origin,
+                style = MaterialTheme.typography.subtitle1
+            )
+            Text(
+                text = coffee.roaster,
+                style = MaterialTheme.typography.subtitle1
+            )
         }
     }
 }
