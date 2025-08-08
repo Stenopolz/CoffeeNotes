@@ -1,5 +1,6 @@
 package coffeedetailsscreen
 
+import addnewrecipescreen.AddNewRecipeScreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -83,7 +84,9 @@ class CoffeeDetailsScreen(
                     Button(
                         modifier = Modifier.padding(vertical = 8.dp),
                         onClick = {
-                            // TODO: add new recipe
+                            navigator.push(
+                                AddNewRecipeScreen(coffee)
+                            )
                         }
                     ) {
                         Text(

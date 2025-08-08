@@ -12,6 +12,7 @@ class CoffeeDetailsScreenModel(
     private val repository: CoffeeRepository,
 ) : ScreenModel {
     private val recipeList = MutableStateFlow<List<Recipe>>(emptyList())
+
     fun onStart() {
         recipeList.value = repository.getRecipes(coffee.id)
     }

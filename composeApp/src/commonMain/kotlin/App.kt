@@ -9,21 +9,5 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 fun App() {
     MaterialTheme {
         Navigator(HomeScreen)
-//        var greetingText by remember { mutableStateOf("Hello World!") }
-//        var showImage by remember { mutableStateOf(false) }
-//        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-//            Button(onClick = {
-//                greetingText = "Compose: ${Greeting().greet()}"
-//                showImage = !showImage
-//            }) {
-//                Text(greetingText)
-//            }
-//            AnimatedVisibility(showImage) {
-//                Image(
-//                    painterResource("compose-multiplatform.xml"),
-//                    null
-//                )
-//            }
-//        }
     }
 }
