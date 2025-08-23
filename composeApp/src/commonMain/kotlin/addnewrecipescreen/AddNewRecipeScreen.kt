@@ -16,7 +16,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,12 +25,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import data.Coffee
-import domain.CoffeeRepositoryImpl
+import org.koin.core.parameter.parametersOf
 
 class AddNewRecipeScreen(
     private val coffee: Coffee
@@ -38,11 +38,8 @@ class AddNewRecipeScreen(
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val screenModel = rememberScreenModel {
-            AddNewRecipeScreenModel(
-                coffee = coffee,
-                repository = CoffeeRepositoryImpl,
-            )
+        val screenModel = getScreenModel<AddNewRecipeScreenModel> {
+            parametersOf(coffee, { navigator.pop() })
         }
 
         var temperature by remember { mutableStateOf("") }
@@ -68,7 +65,7 @@ class AddNewRecipeScreen(
                                 navigator.pop()
                             }
                         ) {
-                            Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
                     }
                 )
@@ -85,8 +82,8 @@ class AddNewRecipeScreen(
                                 temperature = temperature.toInt(),
                                 totalTime = totalTime.toInt(),
                                 grindSize = grindSize.toInt(),
-                                waterAmount = waterAmount.toInt(),
-                                weight = coffeeWeight.toInt(),
+                                waterAmount = waterAmount,
+                                weight = coffeeWeight,
                                 notes = notes,
                                 rating = rating.toInt()
                             )
@@ -128,13 +125,13 @@ class AddNewRecipeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     value = waterAmount,
                     onValueChange = { waterAmount = it },
-                    label = { Text("Water Amount (mg)") }
+                    label = { Text("Water Amount (g)") }
                 )
                 TextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = coffeeWeight,
                     onValueChange = { coffeeWeight = it },
-                    label = { Text("Coffee Weight (mg)") }
+                    label = { Text("Coffee Weight (g)") }
                 )
                 TextField(
                     modifier = Modifier.fillMaxWidth(),
@@ -146,7 +143,7 @@ class AddNewRecipeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     value = rating,
                     onValueChange = { rating = it },
-                    label = { Text("Rating (1-5)") }
+                    label = { Text("Rating (1-10)") }
                 )
             }
         }

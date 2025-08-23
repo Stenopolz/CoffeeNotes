@@ -16,7 +16,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,11 +25,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import domain.CoffeeRepositoryImpl
+import org.koin.core.parameter.parametersOf
 
 class AddCoffeeScreen : Screen {
 
@@ -37,13 +37,8 @@ class AddCoffeeScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
-        val screenModel = rememberScreenModel {
-            AddCoffeeScreenModel(
-                repository = CoffeeRepositoryImpl,
-                navigateBack = {
-                    navigator.pop()
-                }
-            )
+        val screenModel = getScreenModel<AddCoffeeScreenModel> {
+            parametersOf({ navigator.pop() })
         }
 
         var title by remember { mutableStateOf("") }
@@ -65,7 +60,7 @@ class AddCoffeeScreen : Screen {
                                 navigator.pop()
                             }
                         ) {
-                            Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
                     }
                 )

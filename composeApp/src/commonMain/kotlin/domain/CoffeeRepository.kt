@@ -2,117 +2,91 @@ package domain
 
 import data.Coffee
 import data.Recipe
-
+import database.CoffeeDao
+import database.CoffeeEntity
+import database.RecipeDao
+import database.RecipeEntity
 
 interface CoffeeRepository {
-    fun getCoffeeList(): List<Coffee>
-    fun addCoffee(coffee: Coffee)
-    fun removeCoffee(coffee: Coffee)
-    fun getRecipes(coffeeId: String): List<Recipe>
-    fun addRecipe(coffeeId: String, recipe: Recipe)
-    fun removeRecipe(coffeeId: String, recipeId: String)
+    suspend fun getCoffeeList(): List<Coffee>
+    suspend fun addCoffee(coffee: Coffee)
+    suspend fun removeCoffee(coffee: Coffee)
+    suspend fun getRecipes(coffeeId: Int): List<Recipe>
+    suspend fun addRecipe(recipe: Recipe)
+    suspend fun removeRecipe(recipe: Recipe)
 }
 
-object CoffeeRepositoryImpl : CoffeeRepository {
-    private val coffeeList = mutableListOf<Coffee>(
-            Coffee(
-                id = "0",
-                title = "Kenia Jopa Slona",
-                origin = "Kenia",
-                roaster = "Slon"
-            ),
-        Coffee(
-            id = "1",
-            title = "Kenia Morda Slona",
-            origin = "Kenia",
-            roaster = "Slon"
-        ),
-        Coffee(
-            id = "2",
-            title = "Kenia Uho Slona",
-            origin = "Kenia",
-            roaster = "Slon"
-        ),
-        Coffee(
-            id = "3",
-            title = "Kenia Hobot Slona",
-            origin = "Kenia",
-            roaster = "Slon"
+class CoffeeRepositoryImpl(
+    private val coffeeDao: CoffeeDao,
+    private val recipeDao: RecipeDao,
+) : CoffeeRepository {
+    override suspend fun getCoffeeList(): List<Coffee> {
+        return coffeeDao.getAllCoffee().map { it.toAppData()}
+    }
+
+    override suspend fun addCoffee(coffee: Coffee) {
+        coffeeDao.insertCoffee(coffee.toEntity())
+    }
+
+    override suspend fun removeCoffee(coffee: Coffee) {
+        coffeeDao.deleteCoffee(coffee.toEntity())
+    }
+
+    override suspend fun getRecipes(coffeeId: Int): List<Recipe> {
+        return recipeDao.getRecipesByCoffeeId(coffeeId).map { it.toAppData() }
+    }
+
+    override suspend fun addRecipe(recipe: Recipe) {
+        recipeDao.insertRecipe(recipe.toEntity())
+    }
+
+    override suspend fun removeRecipe(recipe: Recipe) {
+        recipeDao.deleteRecipe(recipe.toEntity())
+    }
+    
+    fun CoffeeEntity.toAppData(): Coffee {
+        return Coffee(
+            id = this.id,
+            title = this.title,
+            origin = this.origin,
+            roaster = this.roaster
         )
-    )
-
-    private val recipes = mutableMapOf<String, List<Recipe>>(
-        "0" to listOf(
-            Recipe(
-                id = "0",
-                temperature = 98,
-                totalTime = 180,
-                grindSize = 0,
-                waterAmountMilligrams = 200000,
-                weightMilligrams = 15000,
-                notes = "Very good",
-                rating = 50,
-            ),
-            Recipe(
-                id = "1",
-                temperature = 98,
-                totalTime = 190,
-                grindSize = 8,
-                waterAmountMilligrams = 200000,
-                weightMilligrams = 15000,
-                notes = "Bitter",
-                rating = 50,
-            ),
-        ),
-        "1" to listOf(
-            Recipe(
-                id = "2",
-                temperature = 98,
-                totalTime = 180,
-                grindSize = 0,
-                waterAmountMilligrams = 200000,
-                weightMilligrams = 15000,
-                notes = "Very good",
-                rating = 50,
-            ),
-        ),
-        "2" to listOf(
-            Recipe(
-                id = "3",
-                temperature = 98,
-                totalTime = 180,
-                grindSize = 0,
-                waterAmountMilligrams = 200000,
-                weightMilligrams = 15000,
-                notes = "Very good",
-                rating = 50,
-            ),
+    }
+    
+    fun Coffee.toEntity(): CoffeeEntity {
+        return CoffeeEntity(
+            id = this.id,
+            title = this.title,
+            origin = this.origin,
+            roaster = this.roaster
         )
-    )
-
-    override fun getCoffeeList(): List<Coffee> {
-        return coffeeList
     }
 
-    override fun addCoffee(coffee: Coffee) {
-        coffeeList.add(coffee.copy(id = "$coffeeList.size"))
+    fun RecipeEntity.toAppData(): Recipe {
+        return Recipe(
+            id = this.id,
+            coffeeId = this.coffeeId,
+            temperature = this.temperature,
+            totalTimeSeconds = this.totalTimeSeconds,
+            grindSize = this.grindSize,
+            waterAmountGrams = this.waterAmountGrams,
+            weightGrams = this.weightGrams,
+            notes = this.notes,
+            rating = this.rating
+        )
     }
 
-    override fun removeCoffee(coffee: Coffee) {
-        coffeeList.remove(coffee)
-    }
-
-    override fun getRecipes(coffeeId: String): List<Recipe> {
-        return recipes[coffeeId] ?: emptyList()
-    }
-
-    override fun addRecipe(coffeeId: String, recipe: Recipe) {
-        val currentRecipes = recipes[coffeeId] ?: emptyList()
-        recipes[coffeeId] = currentRecipes + recipe
-    }
-
-    override fun removeRecipe(coffeeId: String, recipeId: String) {
-        val currentRecipes = recipes[coffeeId] ?: emptyList()
-        recipes[coffeeId] = currentRecipes.filter { it.id != recipeId }
+    fun Recipe.toEntity(): RecipeEntity {
+        return RecipeEntity(
+            id = this.id,
+            coffeeId = this.coffeeId,
+            temperature = this.temperature,
+            totalTimeSeconds = this.totalTimeSeconds,
+            grindSize = this.grindSize,
+            waterAmountGrams = this.waterAmountGrams,
+            weightGrams = this.weightGrams,
+            notes = this.notes,
+            rating = this.rating
+        )
     }
 }

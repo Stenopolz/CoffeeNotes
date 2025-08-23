@@ -24,18 +24,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.lifecycle.LifecycleEffect
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coffeedetailsscreen.CoffeeDetailsScreen
 import data.Coffee
-import domain.CoffeeRepositoryImpl
 
 object HomeScreen : Screen {
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel { HomeScreenModel(CoffeeRepositoryImpl) }
+        val screenModel = getScreenModel<HomeScreenModel>()
         val coffeeList by screenModel.getCoffee().collectAsState()
         val navigator = LocalNavigator.currentOrThrow
 

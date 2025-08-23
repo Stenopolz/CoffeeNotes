@@ -21,7 +21,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,26 +29,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.lifecycle.LifecycleEffect
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import data.Coffee
 import data.Recipe
-import domain.CoffeeRepositoryImpl
-import kotlin.math.round
+import org.koin.core.parameter.parametersOf
 
 class CoffeeDetailsScreen(
     private val coffee: Coffee
 ) : Screen {
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel {
-            CoffeeDetailsScreenModel(
-                coffee = coffee,
-                repository = CoffeeRepositoryImpl
-            )
-        }
+        val screenModel = getScreenModel<CoffeeDetailsScreenModel> { parametersOf(coffee) }
         val recipeList by screenModel.getRecipes().collectAsState()
         val navigator = LocalNavigator.currentOrThrow
 
@@ -71,7 +65,7 @@ class CoffeeDetailsScreen(
                                 navigator.pop()
                             }
                         ) {
-                            Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
                     }
                 )
@@ -162,14 +156,14 @@ class CoffeeDetailsScreen(
                     modifier = Modifier.padding(
                         top = 8.dp
                     ),
-                    text = "Water Amount: ${recipe.waterAmountMilligrams / 1000} g",
+                    text = "Water Amount: ${recipe.waterAmountGrams} g",
                     style = MaterialTheme.typography.subtitle1
                 )
                 Text(
                     modifier = Modifier.padding(
                         top = 8.dp
                     ),
-                    text = "Coffee Amount: ${recipe.weightMilligrams / 1000} g",
+                    text = "Coffee Amount: ${recipe.weightGrams} g",
                     style = MaterialTheme.typography.subtitle1
                 )
                 Text(
@@ -181,7 +175,7 @@ class CoffeeDetailsScreen(
                 )
             }
             Text(
-                text = "Rating: ${round(recipe.rating / 10.0)}",
+                text = "Rating: ${recipe.rating}",
                 style = MaterialTheme.typography.subtitle1
             )
         }

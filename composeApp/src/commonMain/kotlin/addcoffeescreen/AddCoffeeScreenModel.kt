@@ -1,8 +1,10 @@
 package addcoffeescreen
 
 import cafe.adriel.voyager.core.model.ScreenModel
+import cafe.adriel.voyager.core.model.screenModelScope
 import data.Coffee
 import domain.CoffeeRepository
+import kotlinx.coroutines.launch
 
 class AddCoffeeScreenModel(
     private val repository: CoffeeRepository,
@@ -14,15 +16,17 @@ class AddCoffeeScreenModel(
         origin: String,
         roaster: String,
     ) {
-        repository.addCoffee(
-            Coffee(
-                id = "",
-                title = title,
-                origin = origin,
-                roaster = roaster
+        screenModelScope.launch {
+            repository.addCoffee(
+                Coffee(
+                    id = 0,
+                    title = title,
+                    origin = origin,
+                    roaster = roaster
+                )
             )
-        )
 
-        navigateBack()
+            navigateBack()
+        }
     }
 }
