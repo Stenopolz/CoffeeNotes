@@ -1,14 +1,30 @@
-This is a Kotlin Multiplatform project targeting Android, iOS.
+# Coffee Notes
 
-* `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - `commonMain` is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    `iosMain` would be the right folder for such calls.
+This is a Kotlin Multiplatform app targeting Android and iOS.
 
-* `/iosApp` contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform, 
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+It's created to track Coffee recipes for home baristas.
+All data is stored locally on the device. No cloud sync or account system.
 
+# Technologies used:
+- Kotlin Multiplatform
+- Jetpack Compose for Android UI
+- Voyager for navigation and screen management
+- Room for local database
+- Koin for dependency injection
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+### Existing functions are:
+- View coffee list
+- Add new coffee
+- View coffee recipes
+- Add new recipe for existing coffee
+
+### Planned functions:
+- Search coffee
+- Edit coffees and recipes
+- Duplicate and edit recipes to simplify process
+- Delete coffees and recipes
+- Export data for backup
+- Import data from backup
+
+### Video demo:
+https://github.com/user-attachments/assets/2dd4e01e-975d-4ddb-975e-8e2428c7db55
