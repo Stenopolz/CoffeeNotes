@@ -11,12 +11,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,6 +39,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import coffeedetailsscreen.CoffeeDetailsScreen
 import data.Coffee
 
+@OptIn(ExperimentalMaterial3Api::class)
 object HomeScreen : Screen {
     @Composable
     override fun Content() {
@@ -42,6 +51,21 @@ object HomeScreen : Screen {
             onStarted = { screenModel.onStart() }
         )
 
+        MainContent(
+            navigateToDetails = { navigator push CoffeeDetailsScreen(it) },
+            navigateToAddNewCoffee = { navigator push AddCoffeeScreen() },
+            screenModel = screenModel,
+            coffeeList = coffeeList
+        )
+    }
+
+    @Composable
+    private fun MainContent(
+        navigateToDetails: (Coffee) -> Unit,
+        navigateToAddNewCoffee: () -> Unit,
+        screenModel: HomeScreenModel,
+        coffeeList: List<Coffee>
+    ) {
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -60,9 +84,7 @@ object HomeScreen : Screen {
                 ) {
                     Button(
                         modifier = Modifier.padding(vertical = 8.dp),
-                        onClick = {
-                            navigator push AddCoffeeScreen()
-                        }
+                        onClick = navigateToAddNewCoffee
                     ) {
                         Text(
                             text = "Add new coffee",
@@ -72,18 +94,58 @@ object HomeScreen : Screen {
                 }
             }
         ) {
-            LazyColumn(
+            Column(
                 modifier = Modifier.fillMaxSize().background(
                     color = MaterialTheme.colors.surface
-                ),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                )
             ) {
-                itemsIndexed(coffeeList) { index, coffee ->
-                    CoffeeRow(coffee) {
-                        navigator push CoffeeDetailsScreen(coffee)
-                    }
-                    if (index < coffeeList.lastIndex) {
-                        Divider()
+                val searchFieldState = screenModel.searchFieldState
+                SearchBar(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            horizontal = 16.dp,
+                            vertical = 16.dp
+                        ),
+                    shape = SearchBarDefaults.inputFieldShape,
+                    inputField = {
+                        SearchBarDefaults.InputField(
+                            query = searchFieldState.text.toString(),
+                            onQueryChange = {
+                                searchFieldState.edit { replace(0, length, it) }
+                            },
+                            onSearch = { /* No-op */ },
+                            expanded = false,
+                            onExpandedChange = { },
+                            placeholder = { Text("Looking for a specific coffee?") },
+                            trailingIcon = {
+                                if (searchFieldState.text.isNotEmpty()) {
+                                    IconButton(
+                                        onClick = {
+                                            searchFieldState.clearText()
+                                        }
+                                    ) {
+                                        Icon(Icons.Filled.Clear, contentDescription = "Clear")
+                                    }
+                                }
+                            }
+                        )
+                    },
+                    expanded = false,
+                    onExpandedChange = { /* No-op */ }
+                ) { /* No-op */ }
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    itemsIndexed(coffeeList) { index, coffee ->
+                        CoffeeRow(coffee) {
+                            navigateToDetails(coffee)
+                        }
+                        if (index < coffeeList.lastIndex) {
+                            Divider()
+                        }
                     }
                 }
             }

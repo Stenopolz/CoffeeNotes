@@ -9,6 +9,7 @@ import database.RecipeEntity
 
 interface CoffeeRepository {
     suspend fun getCoffeeList(): List<Coffee>
+    suspend fun searchCoffee(query: String): List<Coffee>
     suspend fun addCoffee(coffee: Coffee)
     suspend fun removeCoffee(coffee: Coffee)
     suspend fun getRecipes(coffeeId: Int): List<Recipe>
@@ -22,6 +23,10 @@ class CoffeeRepositoryImpl(
 ) : CoffeeRepository {
     override suspend fun getCoffeeList(): List<Coffee> {
         return coffeeDao.getAllCoffee().map { it.toAppData()}
+    }
+
+    override suspend fun searchCoffee(query: String): List<Coffee> {
+        return coffeeDao.searchCoffee(query).map { it.toAppData() }
     }
 
     override suspend fun addCoffee(coffee: Coffee) {
