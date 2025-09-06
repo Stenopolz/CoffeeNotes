@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -15,8 +17,10 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +43,7 @@ class EditRecipeScreen(
         val screenModel = getScreenModel<EditRecipeScreenModel> {
             parametersOf(recipe, { navigator.pop() })
         }
+        val showConfirmationDialog by screenModel.getShowDeleteConfirmationDialog().collectAsState()
 
         var temperature by remember { mutableStateOf(recipe.temperature.toString()) }
         var totalTime by remember { mutableStateOf(recipe.totalTimeSeconds.toString()) }
@@ -67,6 +72,14 @@ class EditRecipeScreen(
                         }
                     },
                     actions = {
+                        IconButton(
+                            modifier = Modifier,
+                            onClick = {
+                                screenModel.onDeleteClick()
+                            }
+                        ) {
+                            Icon(Icons.Filled.Delete, contentDescription = "Delete")
+                        }
                         IconButton(
                             modifier = Modifier,
                             onClick = {
@@ -137,5 +150,41 @@ class EditRecipeScreen(
                 )
             }
         }
+
+        if (showConfirmationDialog) {
+            DeleteConfirmationDialog(
+                onConfirm = screenModel::onConfirmDeleteClick,
+                onDismiss = screenModel::onDismissDeleteClick
+            )
+        }
+    }
+
+    @Composable
+    private fun DeleteConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Text(text = "Delete Recipe")
+            },
+            text = {
+                Text("Are you sure you want to delete this recipe?")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onConfirm()
+                    }
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = onDismiss
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }

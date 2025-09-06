@@ -20,11 +20,11 @@ All data is stored locally on the device. No cloud sync or account system.
 - Search coffee
 - Delete coffee
 - Edit recipe
+- Delete recipe
 
 ### Planned functions:
 - Edit coffee
 - Duplicate and edit recipes to simplify process
-- Delete recipe
 - Export data for backup
 - Import data from backup
 
