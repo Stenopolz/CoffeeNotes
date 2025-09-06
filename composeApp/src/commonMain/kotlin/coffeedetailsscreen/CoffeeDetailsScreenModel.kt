@@ -12,8 +12,10 @@ import kotlinx.coroutines.launch
 class CoffeeDetailsScreenModel(
     private val coffee: Coffee,
     private val repository: CoffeeRepository,
+    private val navigateBack: () -> Unit,
 ) : ScreenModel {
     private val recipeList = MutableStateFlow<List<Recipe>>(emptyList())
+    private val showDeleteConfirmationDialog = MutableStateFlow(false)
 
     fun onStart() {
         screenModelScope.launch {
@@ -22,4 +24,21 @@ class CoffeeDetailsScreenModel(
     }
 
     fun getRecipes(): StateFlow<List<Recipe>> = recipeList
+
+    fun onDeleteClick() {
+        showDeleteConfirmationDialog.value = true
+    }
+
+    fun onConfirmDeleteClick() {
+        screenModelScope.launch {
+            repository.removeCoffee(coffee)
+            navigateBack()
+        }
+    }
+
+    fun onDismissDeleteClick() {
+        showDeleteConfirmationDialog.value = false
+    }
+
+    fun getShowDeleteConfirmationDialog(): StateFlow<Boolean> = showDeleteConfirmationDialog
 }

@@ -17,12 +17,14 @@ All data is stored locally on the device. No cloud sync or account system.
 - Add new coffee
 - View coffee recipes
 - Add new recipe for existing coffee
+- Search coffee
+- Delete coffee
 
 ### Planned functions:
-- Search coffee
-- Edit coffees and recipes
+- Edit coffee
+- Edit recipe
 - Duplicate and edit recipes to simplify process
-- Delete coffees and recipes
+- Delete recipe
 - Export data for backup
 - Import data from backup
 

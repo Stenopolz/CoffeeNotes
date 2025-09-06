@@ -34,6 +34,7 @@ class CoffeeRepositoryImpl(
     }
 
     override suspend fun removeCoffee(coffee: Coffee) {
+        recipeDao.deleteRecipesByCoffeeId(coffee.id)
         coffeeDao.deleteCoffee(coffee.toEntity())
     }
 

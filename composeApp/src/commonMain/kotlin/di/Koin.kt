@@ -54,6 +54,7 @@ val screenViewModels = module {
         CoffeeDetailsScreenModel(
             coffee = params.get(),
             repository = get(),
+            navigateBack = params.get(),
         )
     }
     factory { params ->

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -22,6 +23,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -42,9 +44,12 @@ class CoffeeDetailsScreen(
 ) : Screen {
     @Composable
     override fun Content() {
-        val screenModel = getScreenModel<CoffeeDetailsScreenModel> { parametersOf(coffee) }
-        val recipeList by screenModel.getRecipes().collectAsState()
         val navigator = LocalNavigator.currentOrThrow
+        val screenModel = getScreenModel<CoffeeDetailsScreenModel> {
+            parametersOf(coffee, { navigator.pop() })
+        }
+        val recipeList by screenModel.getRecipes().collectAsState()
+        val showConfirmationDialog by screenModel.getShowDeleteConfirmationDialog().collectAsState()
 
         LifecycleEffect(
             onStarted = { screenModel.onStart() }
@@ -66,6 +71,15 @@ class CoffeeDetailsScreen(
                             }
                         ) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                screenModel.onDeleteClick()
+                            }
+                        ) {
+                            Icon(Icons.Filled.Delete, contentDescription = "Delete")
                         }
                     }
                 )
@@ -134,6 +148,13 @@ class CoffeeDetailsScreen(
                 }
             }
         }
+
+        if (showConfirmationDialog) {
+            DeleteConfirmationDialog(
+                onConfirm = screenModel::onConfirmDeleteClick,
+                onDismiss = screenModel::onDismissDeleteClick
+            )
+        }
     }
 
     @Composable
@@ -179,5 +200,34 @@ class CoffeeDetailsScreen(
                 style = MaterialTheme.typography.subtitle1
             )
         }
+    }
+
+    @Composable
+    private fun DeleteConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Text(text = "Delete Coffee")
+            },
+            text = {
+                Text("Are you sure you want to delete this coffee and all its recipes?")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onConfirm()
+                    }
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = onDismiss
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
