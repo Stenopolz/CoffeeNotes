@@ -15,6 +15,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
+import ui.editrecipescreen.EditRecipeScreenModel
 
 expect fun platformModule(): Module
 
@@ -66,6 +67,13 @@ val screenViewModels = module {
     }
     factory { params ->
         AddCoffeeScreenModel(
+            repository = get(),
+            navigateBack = params.get(),
+        )
+    }
+    factory { params ->
+        EditRecipeScreenModel(
+            recipe = params.get(),
             repository = get(),
             navigateBack = params.get(),
         )

@@ -14,6 +14,7 @@ interface CoffeeRepository {
     suspend fun removeCoffee(coffee: Coffee)
     suspend fun getRecipes(coffeeId: Int): List<Recipe>
     suspend fun addRecipe(recipe: Recipe)
+    suspend fun updateRecipe(recipe: Recipe)
     suspend fun removeRecipe(recipe: Recipe)
 }
 
@@ -44,6 +45,10 @@ class CoffeeRepositoryImpl(
 
     override suspend fun addRecipe(recipe: Recipe) {
         recipeDao.insertRecipe(recipe.toEntity())
+    }
+
+    override suspend fun updateRecipe(recipe: Recipe) {
+        recipeDao.updateRecipe(recipe.toEntity())
     }
 
     override suspend fun removeRecipe(recipe: Recipe) {

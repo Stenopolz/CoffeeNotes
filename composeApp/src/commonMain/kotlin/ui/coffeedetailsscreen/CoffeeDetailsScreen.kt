@@ -1,7 +1,7 @@
 package ui.coffeedetailsscreen
 
-import ui.addnewrecipescreen.AddNewRecipeScreen
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +38,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import data.Coffee
 import data.Recipe
 import org.koin.core.parameter.parametersOf
+import ui.addnewrecipescreen.AddNewRecipeScreen
+import ui.editrecipescreen.EditRecipeScreen
 
 class CoffeeDetailsScreen(
     private val coffee: Coffee
@@ -141,7 +143,10 @@ class CoffeeDetailsScreen(
                     Divider(color = MaterialTheme.colors.primary)
                 }
                 itemsIndexed(recipeList) { index, recipe ->
-                    RecipeRow(recipe = recipe)
+                    RecipeRow(
+                        recipe = recipe,
+                        onClick = { navigator push EditRecipeScreen(recipe) }
+                    )
                     if (index < recipeList.lastIndex) {
                         Divider()
                     }
@@ -158,9 +163,14 @@ class CoffeeDetailsScreen(
     }
 
     @Composable
-    private fun RecipeRow(recipe: Recipe) {
+    private fun RecipeRow(
+        recipe: Recipe,
+        onClick: () -> Unit,
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {

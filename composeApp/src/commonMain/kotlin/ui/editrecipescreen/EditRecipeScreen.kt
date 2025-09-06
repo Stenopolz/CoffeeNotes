@@ -1,4 +1,4 @@
-package ui.addnewrecipescreen
+package ui.editrecipescreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,11 +11,11 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,33 +27,33 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import data.Coffee
+import data.Recipe
 import org.koin.core.parameter.parametersOf
 
-class AddNewRecipeScreen(
-    private val coffee: Coffee
+class EditRecipeScreen(
+    private val recipe: Recipe
 ) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val screenModel = getScreenModel<AddNewRecipeScreenModel> {
-            parametersOf(coffee, { navigator.pop() })
+        val screenModel = getScreenModel<EditRecipeScreenModel> {
+            parametersOf(recipe, { navigator.pop() })
         }
 
-        var temperature by remember { mutableStateOf("") }
-        var totalTime by remember { mutableStateOf("") }
-        var grindSize by remember { mutableStateOf("") }
-        var waterAmount by remember { mutableStateOf("") }
-        var coffeeWeight by remember { mutableStateOf("") }
-        var notes by remember { mutableStateOf("") }
-        var rating by remember { mutableStateOf("") }
+        var temperature by remember { mutableStateOf(recipe.temperature.toString()) }
+        var totalTime by remember { mutableStateOf(recipe.totalTimeSeconds.toString()) }
+        var grindSize by remember { mutableStateOf(recipe.grindSize.toString()) }
+        var waterAmount by remember { mutableStateOf(recipe.waterAmountGrams) }
+        var coffeeWeight by remember { mutableStateOf(recipe.weightGrams) }
+        var notes by remember { mutableStateOf(recipe.notes) }
+        var rating by remember { mutableStateOf(recipe.rating.toString()) }
 
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = {
                         Text(
-                            text = "New Recipe",
+                            text = "Edit Recipe",
                             style = MaterialTheme.typography.h5
                         )
                     },
@@ -67,10 +67,10 @@ class AddNewRecipeScreen(
                         }
                     },
                     actions = {
-                        TextButton(
+                        IconButton(
                             modifier = Modifier,
                             onClick = {
-                                screenModel.createRecipe(
+                                screenModel.saveRecipe(
                                     temperature = temperature.toInt(),
                                     totalTime = totalTime.toInt(),
                                     grindSize = grindSize.toInt(),
@@ -81,11 +81,7 @@ class AddNewRecipeScreen(
                                 )
                             }
                         ) {
-                            Text(
-                                text = "Save",
-                                style = MaterialTheme.typography.h6,
-                                color = MaterialTheme.colors.onPrimary
-                            )
+                            Icon(Icons.Filled.Save, contentDescription = "Save")
                         }
                     }
                 )
