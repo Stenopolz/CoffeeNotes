@@ -1,4 +1,4 @@
-package addnewrecipescreen
+package ui.addnewrecipescreen
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope

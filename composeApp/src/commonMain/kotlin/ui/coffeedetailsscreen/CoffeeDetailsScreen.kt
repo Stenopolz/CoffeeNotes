@@ -1,6 +1,6 @@
-package coffeedetailsscreen
+package ui.coffeedetailsscreen
 
-import addnewrecipescreen.AddNewRecipeScreen
+import ui.addnewrecipescreen.AddNewRecipeScreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

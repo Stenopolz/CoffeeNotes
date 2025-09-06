@@ -1,6 +1,6 @@
-package homescreen
+package ui.homescreen
 
-import addcoffeescreen.AddCoffeeScreen
+import ui.addcoffeescreen.AddCoffeeScreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,7 +36,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import coffeedetailsscreen.CoffeeDetailsScreen
+import ui.coffeedetailsscreen.CoffeeDetailsScreen
 import data.Coffee
 
 @OptIn(ExperimentalMaterial3Api::class)

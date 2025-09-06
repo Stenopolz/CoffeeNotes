@@ -1,16 +1,16 @@
 package di
 
-import addcoffeescreen.AddCoffeeScreenModel
-import addnewrecipescreen.AddNewRecipeScreenModel
+import ui.addcoffeescreen.AddCoffeeScreenModel
+import ui.addnewrecipescreen.AddNewRecipeScreenModel
 import androidx.room.RoomDatabase
-import coffeedetailsscreen.CoffeeDetailsScreenModel
+import ui.coffeedetailsscreen.CoffeeDetailsScreenModel
 import database.CoffeeDao
 import database.CoffeeDatabase
 import database.CoffeeDatabase.Companion.getCoffeeDatabase
 import database.RecipeDao
 import domain.CoffeeRepository
 import domain.CoffeeRepositoryImpl
-import homescreen.HomeScreenModel
+import ui.homescreen.HomeScreenModel
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.dsl.KoinAppDeclaration

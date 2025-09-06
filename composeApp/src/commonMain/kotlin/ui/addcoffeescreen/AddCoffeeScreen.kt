@@ -1,4 +1,4 @@
-package addnewrecipescreen
+package ui.addcoffeescreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,33 +29,28 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import data.Coffee
 import org.koin.core.parameter.parametersOf
 
-class AddNewRecipeScreen(
-    private val coffee: Coffee
-) : Screen {
+class AddCoffeeScreen : Screen {
+
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val screenModel = getScreenModel<AddNewRecipeScreenModel> {
-            parametersOf(coffee, { navigator.pop() })
+
+        val screenModel = getScreenModel<AddCoffeeScreenModel> {
+            parametersOf({ navigator.pop() })
         }
 
-        var temperature by remember { mutableStateOf("") }
-        var totalTime by remember { mutableStateOf("") }
-        var grindSize by remember { mutableStateOf("") }
-        var waterAmount by remember { mutableStateOf("") }
-        var coffeeWeight by remember { mutableStateOf("") }
-        var notes by remember { mutableStateOf("") }
-        var rating by remember { mutableStateOf("") }
+        var title by remember { mutableStateOf("") }
+        var origin by remember { mutableStateOf("") }
+        var roaster by remember { mutableStateOf("") }
 
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = {
                         Text(
-                            text = "New Recipe",
+                            text = "Coffee Notes",
                             style = MaterialTheme.typography.h5
                         )
                     },
@@ -78,15 +73,7 @@ class AddNewRecipeScreen(
                     Button(
                         modifier = Modifier.padding(vertical = 8.dp),
                         onClick = {
-                            screenModel.createRecipe(
-                                temperature = temperature.toInt(),
-                                totalTime = totalTime.toInt(),
-                                grindSize = grindSize.toInt(),
-                                waterAmount = waterAmount,
-                                weight = coffeeWeight,
-                                notes = notes,
-                                rating = rating.toInt()
-                            )
+                            screenModel.createCoffee(title, origin, roaster)
                         }
                     ) {
                         Text(
@@ -105,45 +92,21 @@ class AddNewRecipeScreen(
             ) {
                 TextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = temperature,
-                    onValueChange = { temperature = it },
-                    label = { Text("Temperature (°C)") }
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Coffee Name") }
                 )
                 TextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = totalTime,
-                    onValueChange = { totalTime = it },
-                    label = { Text("Total Brew Time (s)") }
+                    value = origin,
+                    onValueChange = { origin = it },
+                    label = { Text("Country of origin") }
                 )
                 TextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = grindSize,
-                    onValueChange = { grindSize = it },
-                    label = { Text("Grind Size") }
-                )
-                TextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = waterAmount,
-                    onValueChange = { waterAmount = it },
-                    label = { Text("Water Amount (g)") }
-                )
-                TextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = coffeeWeight,
-                    onValueChange = { coffeeWeight = it },
-                    label = { Text("Coffee Weight (g)") }
-                )
-                TextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = notes,
-                    onValueChange = { notes = it },
-                    label = { Text("Notes") }
-                )
-                TextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = rating,
-                    onValueChange = { rating = it },
-                    label = { Text("Rating (1-10)") }
+                    value = roaster,
+                    onValueChange = { roaster = it },
+                    label = { Text("Roaster Name") }
                 )
             }
         }

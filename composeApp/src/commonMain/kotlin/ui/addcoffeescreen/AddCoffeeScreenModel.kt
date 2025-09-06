@@ -1,4 +1,4 @@
-package addcoffeescreen
+package ui.addcoffeescreen
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope

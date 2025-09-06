@@ -1,4 +1,4 @@
-package homescreen
+package ui.homescreen
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.snapshotFlow
