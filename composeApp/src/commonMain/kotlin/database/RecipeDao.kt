@@ -9,7 +9,7 @@ import androidx.room.Update
 @Dao
 interface RecipeDao {
     @Insert
-    suspend fun insertRecipe(recipe: RecipeEntity)
+    suspend fun insertRecipe(recipe: RecipeEntity): Long
 
     @Query("SELECT * FROM recipes WHERE id = :id")
     suspend fun getRecipeById(id: Int): RecipeEntity?

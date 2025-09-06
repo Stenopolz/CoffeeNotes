@@ -8,22 +8,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CopyAll
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -32,6 +39,7 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import data.Recipe
+import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
 
 class EditRecipeScreen(
@@ -41,9 +49,16 @@ class EditRecipeScreen(
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<EditRecipeScreenModel> {
-            parametersOf(recipe, { navigator.pop() })
+            parametersOf(
+                recipe,
+                { navigator.pop() },
+                { recipe: Recipe -> navigator.replace(EditRecipeScreen(recipe)) }
+            )
         }
         val showConfirmationDialog by screenModel.getShowDeleteConfirmationDialog().collectAsState()
+        var showMenu by remember(recipe.id) { mutableStateOf(false) }
+        val snackbarHostState = remember { SnackbarHostState() }
+        val scope = rememberCoroutineScope()
 
         var temperature by remember { mutableStateOf(recipe.temperature.toString()) }
         var totalTime by remember { mutableStateOf(recipe.totalTimeSeconds.toString()) }
@@ -54,6 +69,9 @@ class EditRecipeScreen(
         var rating by remember { mutableStateOf(recipe.rating.toString()) }
 
         Scaffold(
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState)
+            },
             topBar = {
                 TopAppBar(
                     title = {
@@ -75,14 +93,6 @@ class EditRecipeScreen(
                         IconButton(
                             modifier = Modifier,
                             onClick = {
-                                screenModel.onDeleteClick()
-                            }
-                        ) {
-                            Icon(Icons.Filled.Delete, contentDescription = "Delete")
-                        }
-                        IconButton(
-                            modifier = Modifier,
-                            onClick = {
                                 screenModel.saveRecipe(
                                     temperature = temperature.toInt(),
                                     totalTime = totalTime.toInt(),
@@ -95,6 +105,36 @@ class EditRecipeScreen(
                             }
                         ) {
                             Icon(Icons.Filled.Save, contentDescription = "Save")
+                        }
+                        IconButton(
+                            modifier = Modifier,
+                            onClick = {
+                                showMenu = true
+                            }
+                        ) {
+                            Icon(Icons.Filled.MoreVert, contentDescription = "More")
+                        }
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                onClick = screenModel::onDeleteClick
+                            ) {
+                                Icon(Icons.Filled.Delete, contentDescription = "Delete")
+                                Text(text = "Delete", modifier = Modifier.padding(start = 8.dp))
+                            }
+                            DropdownMenuItem(
+                                onClick = {
+                                    screenModel.onDuplicateClick()
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("Editing duplicated recipe")
+                                    }
+                                }
+                            ) {
+                                Icon(Icons.Filled.CopyAll, contentDescription = "Duplicate")
+                                Text(text = "Duplicate", modifier = Modifier.padding(start = 8.dp))
+                            }
                         }
                     }
                 )

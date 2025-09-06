@@ -12,6 +12,7 @@ class EditRecipeScreenModel(
     private val recipe: Recipe,
     private val repository: CoffeeRepository,
     private val navigateBack: () -> Unit,
+    private val navigateForward: (Recipe) -> Unit,
 ) : ScreenModel {
     private val showDeleteConfirmationDialog = MutableStateFlow(false)
 
@@ -54,6 +55,17 @@ class EditRecipeScreenModel(
 
     fun onDismissDeleteClick() {
         showDeleteConfirmationDialog.value = false
+    }
+
+    fun onDuplicateClick() {
+        screenModelScope.launch {
+            val newRecipe = repository.addRecipe(
+                recipe = recipe.copy(
+                    id = 0
+                )
+            )
+            navigateForward(newRecipe)
+        }
     }
 
     fun getShowDeleteConfirmationDialog(): StateFlow<Boolean> = showDeleteConfirmationDialog

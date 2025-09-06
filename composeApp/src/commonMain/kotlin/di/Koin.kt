@@ -76,6 +76,7 @@ val screenViewModels = module {
             recipe = params.get(),
             repository = get(),
             navigateBack = params.get(),
+            navigateForward = params.get()
         )
     }
 }

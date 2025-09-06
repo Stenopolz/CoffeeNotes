@@ -13,7 +13,7 @@ interface CoffeeRepository {
     suspend fun addCoffee(coffee: Coffee)
     suspend fun removeCoffee(coffee: Coffee)
     suspend fun getRecipes(coffeeId: Int): List<Recipe>
-    suspend fun addRecipe(recipe: Recipe)
+    suspend fun addRecipe(recipe: Recipe): Recipe
     suspend fun updateRecipe(recipe: Recipe)
     suspend fun removeRecipe(recipe: Recipe)
 }
@@ -23,7 +23,7 @@ class CoffeeRepositoryImpl(
     private val recipeDao: RecipeDao,
 ) : CoffeeRepository {
     override suspend fun getCoffeeList(): List<Coffee> {
-        return coffeeDao.getAllCoffee().map { it.toAppData()}
+        return coffeeDao.getAllCoffee().map { it.toAppData() }
     }
 
     override suspend fun searchCoffee(query: String): List<Coffee> {
@@ -43,8 +43,10 @@ class CoffeeRepositoryImpl(
         return recipeDao.getRecipesByCoffeeId(coffeeId).map { it.toAppData() }
     }
 
-    override suspend fun addRecipe(recipe: Recipe) {
-        recipeDao.insertRecipe(recipe.toEntity())
+    override suspend fun addRecipe(recipe: Recipe): Recipe {
+        val recipeId = recipeDao.insertRecipe(recipe.toEntity())
+        val recipe = recipeDao.getRecipeById(recipeId.toInt())!! // Should never be null
+        return recipe.toAppData()
     }
 
     override suspend fun updateRecipe(recipe: Recipe) {
@@ -54,7 +56,7 @@ class CoffeeRepositoryImpl(
     override suspend fun removeRecipe(recipe: Recipe) {
         recipeDao.deleteRecipe(recipe.toEntity())
     }
-    
+
     fun CoffeeEntity.toAppData(): Coffee {
         return Coffee(
             id = this.id,
@@ -63,7 +65,7 @@ class CoffeeRepositoryImpl(
             roaster = this.roaster
         )
     }
-    
+
     fun Coffee.toEntity(): CoffeeEntity {
         return CoffeeEntity(
             id = this.id,
