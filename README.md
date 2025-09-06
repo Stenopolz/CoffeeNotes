@@ -29,4 +29,6 @@ All data is stored locally on the device. No cloud sync or account system.
 - Import data from backup
 
 ### Video demo:
-https://github.com/user-attachments/assets/2dd4e01e-975d-4ddb-975e-8e2428c7db55
+https://github.com/user-attachments/assets/c9ecbfdb-5099-4785-a27c-c0569e679f59
+
+
