@@ -15,15 +15,19 @@ class CoffeeDetailsScreenModel(
     private val navigateBack: () -> Unit,
 ) : ScreenModel {
     private val recipeList = MutableStateFlow<List<Recipe>>(emptyList())
+    private val displayedCoffee = MutableStateFlow<Coffee?>(null)
     private val showDeleteConfirmationDialog = MutableStateFlow(false)
 
     fun onStart() {
         screenModelScope.launch {
+            displayedCoffee.value = repository.getCoffee(coffee.id)
             recipeList.value = repository.getRecipes(coffee.id)
         }
     }
 
     fun getRecipes(): StateFlow<List<Recipe>> = recipeList
+
+    fun getCoffee(): StateFlow<Coffee?> = displayedCoffee
 
     fun onDeleteClick() {
         showDeleteConfirmationDialog.value = true

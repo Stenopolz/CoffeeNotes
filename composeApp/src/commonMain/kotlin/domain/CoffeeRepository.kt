@@ -9,8 +9,10 @@ import database.RecipeEntity
 
 interface CoffeeRepository {
     suspend fun getCoffeeList(): List<Coffee>
+    suspend fun getCoffee(coffeeId: Int): Coffee
     suspend fun searchCoffee(query: String): List<Coffee>
     suspend fun addCoffee(coffee: Coffee)
+    suspend fun updateCoffee(coffee: Coffee)
     suspend fun removeCoffee(coffee: Coffee)
     suspend fun getRecipes(coffeeId: Int): List<Recipe>
     suspend fun addRecipe(recipe: Recipe): Recipe
@@ -30,8 +32,17 @@ class CoffeeRepositoryImpl(
         return coffeeDao.searchCoffee(query).map { it.toAppData() }
     }
 
+    override suspend fun getCoffee(coffeeId: Int): Coffee {
+        return coffeeDao.getCoffeeById(coffeeId)?.toAppData()
+            ?: throw IllegalArgumentException("Coffee with id $coffeeId not found")
+    }
+
     override suspend fun addCoffee(coffee: Coffee) {
         coffeeDao.insertCoffee(coffee.toEntity())
+    }
+
+    override suspend fun updateCoffee(coffee: Coffee) {
+        coffeeDao.updateCoffee(coffee.toEntity())
     }
 
     override suspend fun removeCoffee(coffee: Coffee) {

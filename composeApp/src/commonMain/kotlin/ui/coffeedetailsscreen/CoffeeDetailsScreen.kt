@@ -3,7 +3,6 @@ package ui.coffeedetailsscreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -23,7 +22,9 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,11 +35,13 @@ import cafe.adriel.voyager.core.lifecycle.LifecycleEffect
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import data.Coffee
 import data.Recipe
 import org.koin.core.parameter.parametersOf
 import ui.addnewrecipescreen.AddNewRecipeScreen
+import ui.editcoffeescreen.EditCoffeeScreen
 import ui.editrecipescreen.EditRecipeScreen
 
 class CoffeeDetailsScreen(
@@ -50,6 +53,7 @@ class CoffeeDetailsScreen(
         val screenModel = getScreenModel<CoffeeDetailsScreenModel> {
             parametersOf(coffee, { navigator.pop() })
         }
+        val displayedCoffee by screenModel.getCoffee().collectAsState()
         val recipeList by screenModel.getRecipes().collectAsState()
         val showConfirmationDialog by screenModel.getShowDeleteConfirmationDialog().collectAsState()
 
@@ -61,10 +65,6 @@ class CoffeeDetailsScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(
-                            text = coffee.title,
-                            style = MaterialTheme.typography.h5
-                        )
                     },
                     navigationIcon = {
                         IconButton(
@@ -72,7 +72,10 @@ class CoffeeDetailsScreen(
                                 navigator.pop()
                             }
                         ) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
                         }
                     },
                     actions = {
@@ -83,63 +86,35 @@ class CoffeeDetailsScreen(
                         ) {
                             Icon(Icons.Filled.Delete, contentDescription = "Delete")
                         }
+                        IconButton(
+                            onClick = {
+                                navigator push EditCoffeeScreen(coffee)
+                            }
+                        ) {
+                            Icon(Icons.Filled.Edit, contentDescription = "Edit")
+                        }
                     }
                 )
             },
-            bottomBar = {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Button(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        onClick = {
-                            navigator.push(
-                                AddNewRecipeScreen(coffee)
-                            )
-                        }
-                    ) {
-                        Text(
-                            text = "Add new recipe",
-                            style = MaterialTheme.typography.h6
-                        )
-                    }
-                }
-            }
-        ) {
+        ) { paddingValues ->
             LazyColumn(
-                modifier = Modifier.fillMaxSize().background(
-                    color = MaterialTheme.colors.surface
-                ),
+                modifier = Modifier.fillMaxSize()
+                    .padding(paddingValues)
+                    .background(
+                        color = MaterialTheme.colors.surface
+                    ),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(
                     horizontal = 24.dp
                 )
             ) {
                 item {
-                    Text(
-                        modifier = Modifier.padding(
-                            top = 16.dp,
-                        ),
-                        text = "Origin: ${coffee.origin}",
-                        style = MaterialTheme.typography.h6
-                    )
-                    Text(
-                        modifier = Modifier.padding(
-                            vertical = 16.dp,
-                        ),
-                        text = "Roaster: ${coffee.roaster}",
-                        style = MaterialTheme.typography.h6
-                    )
+                    CoffeeHeaderRow(displayedCoffee)
                 }
                 item {
-                    Text(
-                        modifier = Modifier.padding(
-                            vertical = 20.dp,
-                        ),
-                        text = "Recipes:",
-                        style = MaterialTheme.typography.h5
-                    )
+                    RecipesHeaderRow(navigator)
+                }
+                item {
                     Divider(color = MaterialTheme.colors.primary)
                 }
                 itemsIndexed(recipeList) { index, recipe ->
@@ -159,6 +134,70 @@ class CoffeeDetailsScreen(
                 onConfirm = screenModel::onConfirmDeleteClick,
                 onDismiss = screenModel::onDismissDeleteClick
             )
+        }
+    }
+
+    @Composable
+    private fun CoffeeHeaderRow(displayedCoffee: Coffee?) {
+        displayedCoffee?.let { displayedCoffee ->
+            Text(
+                modifier = Modifier.padding(
+                    top = 16.dp,
+                ),
+                text = "Name: ${displayedCoffee.title}",
+                style = MaterialTheme.typography.h6
+            )
+            Text(
+                modifier = Modifier.padding(
+                    top = 16.dp,
+                ),
+                text = "Origin: ${displayedCoffee.origin}",
+                style = MaterialTheme.typography.h6
+            )
+            Text(
+                modifier = Modifier.padding(
+                    vertical = 16.dp,
+                ),
+                text = "Roaster: ${displayedCoffee.roaster}",
+                style = MaterialTheme.typography.h6
+            )
+        } ?: run {
+            Text(
+                modifier = Modifier.padding(
+                    vertical = 16.dp,
+                ),
+                text = "Loading...",
+                style = MaterialTheme.typography.h6
+            )
+        }
+    }
+
+    @Composable
+    private fun RecipesHeaderRow(navigator: Navigator) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                modifier = Modifier.padding(
+                    vertical = 20.dp,
+                ),
+                text = "Recipes:",
+                style = MaterialTheme.typography.h5
+            )
+
+            IconButton(
+                onClick = {
+                    navigator push AddNewRecipeScreen(coffee)
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    tint = MaterialTheme.colors.primary,
+                    contentDescription = "Add Recipe",
+                )
+            }
         }
     }
 
@@ -220,7 +259,7 @@ class CoffeeDetailsScreen(
                 Text(text = "Delete Coffee")
             },
             text = {
-                Text("Are you sure you want to delete this coffee and all its recipes?")
+                Text("Are you sure you want to delete this coffee and all of its recipes?")
             },
             confirmButton = {
                 Button(

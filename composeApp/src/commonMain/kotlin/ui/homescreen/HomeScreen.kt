@@ -1,6 +1,5 @@
 package ui.homescreen
 
-import ui.addcoffeescreen.AddCoffeeScreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,8 +35,9 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import ui.coffeedetailsscreen.CoffeeDetailsScreen
 import data.Coffee
+import ui.addcoffeescreen.AddCoffeeScreen
+import ui.coffeedetailsscreen.CoffeeDetailsScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 object HomeScreen : Screen {
@@ -93,11 +93,14 @@ object HomeScreen : Screen {
                     }
                 }
             }
-        ) {
+        ) { paddingValues ->
             Column(
-                modifier = Modifier.fillMaxSize().background(
-                    color = MaterialTheme.colors.surface
-                )
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+                    .background(
+                        color = MaterialTheme.colors.surface
+                    )
             ) {
                 val searchFieldState = screenModel.searchFieldState
                 SearchBar(
