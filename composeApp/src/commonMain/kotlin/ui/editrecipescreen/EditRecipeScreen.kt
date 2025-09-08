@@ -1,30 +1,30 @@
 package ui.editrecipescreen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CopyAll
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -42,6 +42,7 @@ import data.Recipe
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
 
+@OptIn(ExperimentalMaterial3Api::class)
 class EditRecipeScreen(
     private val recipe: Recipe
 ) : Screen {
@@ -77,7 +78,7 @@ class EditRecipeScreen(
                     title = {
                         Text(
                             text = "Edit Recipe",
-                            style = MaterialTheme.typography.h5
+                            style = MaterialTheme.typography.headlineSmall
                         )
                     },
                     navigationIcon = {
@@ -119,31 +120,45 @@ class EditRecipeScreen(
                             onDismissRequest = { showMenu = false }
                         ) {
                             DropdownMenuItem(
+                                text = {
+                                    Text(text = "Delete", modifier = Modifier.padding(start = 8.dp))
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Filled.Delete, contentDescription = "Delete")
+                                },
                                 onClick = screenModel::onDeleteClick
-                            ) {
-                                Icon(Icons.Filled.Delete, contentDescription = "Delete")
-                                Text(text = "Delete", modifier = Modifier.padding(start = 8.dp))
-                            }
+                            )
                             DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = "Duplicate",
+                                        modifier = Modifier.padding(start = 8.dp)
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Filled.CopyAll, contentDescription = "Duplicate")
+                                },
                                 onClick = {
                                     screenModel.onDuplicateClick()
                                     scope.launch {
                                         snackbarHostState.showSnackbar("Editing duplicated recipe")
                                     }
                                 }
-                            ) {
-                                Icon(Icons.Filled.CopyAll, contentDescription = "Duplicate")
-                                Text(text = "Duplicate", modifier = Modifier.padding(start = 8.dp))
-                            }
+                            )
                         }
                     }
                 )
             },
-        ) {
+        ) { paddingValues ->
             Column(
-                modifier = Modifier.fillMaxSize().background(
-                    color = MaterialTheme.colors.surface
-                ).padding(16.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        top = paddingValues.calculateTopPadding(),
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = paddingValues.calculateBottomPadding()
+                    ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 TextField(

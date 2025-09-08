@@ -1,21 +1,21 @@
 package ui.addnewrecipescreen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +30,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import data.Coffee
 import org.koin.core.parameter.parametersOf
 
+@OptIn(ExperimentalMaterial3Api::class)
 class AddNewRecipeScreen(
     private val coffee: Coffee
 ) : Screen {
@@ -54,7 +55,7 @@ class AddNewRecipeScreen(
                     title = {
                         Text(
                             text = "New Recipe",
-                            style = MaterialTheme.typography.h5
+                            style = MaterialTheme.typography.headlineSmall
                         )
                     },
                     navigationIcon = {
@@ -83,18 +84,22 @@ class AddNewRecipeScreen(
                         ) {
                             Text(
                                 text = "Save",
-                                style = MaterialTheme.typography.h6,
-                                color = MaterialTheme.colors.onPrimary
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
                         }
                     }
                 )
             },
-        ) {
+        ) { paddingValues ->
             Column(
-                modifier = Modifier.fillMaxSize().background(
-                    color = MaterialTheme.colors.surface
-                ).padding(16.dp),
+                modifier = Modifier.fillMaxSize()
+                    .padding(
+                        top = paddingValues.calculateTopPadding(),
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = paddingValues.calculateBottomPadding()
+                    ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 TextField(

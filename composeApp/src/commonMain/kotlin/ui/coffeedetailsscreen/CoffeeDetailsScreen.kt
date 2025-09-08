@@ -11,20 +11,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,6 +45,7 @@ import ui.addnewrecipescreen.AddNewRecipeScreen
 import ui.editcoffeescreen.EditCoffeeScreen
 import ui.editrecipescreen.EditRecipeScreen
 
+@OptIn(ExperimentalMaterial3Api::class)
 class CoffeeDetailsScreen(
     private val coffee: Coffee
 ) : Screen {
@@ -99,23 +101,20 @@ class CoffeeDetailsScreen(
         ) { paddingValues ->
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
-                    .padding(paddingValues)
-                    .background(
-                        color = MaterialTheme.colors.surface
-                    ),
+                    .padding(paddingValues),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(
-                    horizontal = 24.dp
+                    horizontal = 16.dp
                 )
             ) {
-                item {
+                stickyHeader {
                     CoffeeHeaderRow(displayedCoffee)
                 }
                 item {
                     RecipesHeaderRow(navigator)
                 }
                 item {
-                    Divider(color = MaterialTheme.colors.primary)
+                    HorizontalDivider(color = MaterialTheme.colorScheme.primary)
                 }
                 itemsIndexed(recipeList) { index, recipe ->
                     RecipeRow(
@@ -123,7 +122,7 @@ class CoffeeDetailsScreen(
                         onClick = { navigator push EditRecipeScreen(recipe) }
                     )
                     if (index < recipeList.lastIndex) {
-                        Divider()
+                        HorizontalDivider()
                     }
                 }
             }
@@ -139,36 +138,42 @@ class CoffeeDetailsScreen(
 
     @Composable
     private fun CoffeeHeaderRow(displayedCoffee: Coffee?) {
-        displayedCoffee?.let { displayedCoffee ->
-            Text(
-                modifier = Modifier.padding(
-                    top = 16.dp,
-                ),
-                text = "Name: ${displayedCoffee.title}",
-                style = MaterialTheme.typography.h6
-            )
-            Text(
-                modifier = Modifier.padding(
-                    top = 16.dp,
-                ),
-                text = "Origin: ${displayedCoffee.origin}",
-                style = MaterialTheme.typography.h6
-            )
-            Text(
-                modifier = Modifier.padding(
-                    vertical = 16.dp,
-                ),
-                text = "Roaster: ${displayedCoffee.roaster}",
-                style = MaterialTheme.typography.h6
-            )
-        } ?: run {
-            Text(
-                modifier = Modifier.padding(
-                    vertical = 16.dp,
-                ),
-                text = "Loading...",
-                style = MaterialTheme.typography.h6
-            )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            displayedCoffee?.let { displayedCoffee ->
+                Text(
+                    modifier = Modifier.padding(
+                        top = 16.dp,
+                    ),
+                    text = "Name: ${displayedCoffee.title}",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text(
+                    modifier = Modifier.padding(
+                        top = 16.dp,
+                    ),
+                    text = "Origin: ${displayedCoffee.origin}",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text(
+                    modifier = Modifier.padding(
+                        vertical = 16.dp,
+                    ),
+                    text = "Roaster: ${displayedCoffee.roaster}",
+                    style = MaterialTheme.typography.titleLarge
+                )
+            } ?: run {
+                Text(
+                    modifier = Modifier.padding(
+                        vertical = 16.dp,
+                    ),
+                    text = "Loading...",
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
         }
     }
 
@@ -184,7 +189,7 @@ class CoffeeDetailsScreen(
                     vertical = 20.dp,
                 ),
                 text = "Recipes:",
-                style = MaterialTheme.typography.h5
+                style = MaterialTheme.typography.headlineSmall
             )
 
             IconButton(
@@ -194,7 +199,7 @@ class CoffeeDetailsScreen(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    tint = MaterialTheme.colors.primary,
+                    tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "Add Recipe",
                 )
             }
@@ -220,33 +225,33 @@ class CoffeeDetailsScreen(
             ) {
                 Text(
                     text = "Temperature: ${recipe.temperature}",
-                    style = MaterialTheme.typography.subtitle1
+                    style = MaterialTheme.typography.titleSmall
                 )
                 Text(
                     modifier = Modifier.padding(
                         top = 8.dp
                     ),
                     text = "Water Amount: ${recipe.waterAmountGrams} g",
-                    style = MaterialTheme.typography.subtitle1
+                    style = MaterialTheme.typography.titleSmall
                 )
                 Text(
                     modifier = Modifier.padding(
                         top = 8.dp
                     ),
                     text = "Coffee Amount: ${recipe.weightGrams} g",
-                    style = MaterialTheme.typography.subtitle1
+                    style = MaterialTheme.typography.titleSmall
                 )
                 Text(
                     modifier = Modifier.padding(
                         top = 8.dp
                     ),
                     text = "Grind Setting: ${recipe.grindSize}",
-                    style = MaterialTheme.typography.subtitle1
+                    style = MaterialTheme.typography.titleSmall
                 )
             }
             Text(
                 text = "Rating: ${recipe.rating}",
-                style = MaterialTheme.typography.subtitle1
+                style = MaterialTheme.typography.titleSmall
             )
         }
     }
