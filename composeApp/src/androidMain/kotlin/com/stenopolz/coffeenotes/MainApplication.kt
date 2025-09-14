@@ -13,5 +13,4 @@ class MainApplication: Application(), KoinComponent {
             androidContext(this@MainApplication)
         }
     }
-
 }

@@ -8,7 +8,7 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
 
 fun getDatabaseBuilder(): RoomDatabase.Builder<CoffeeDatabase> {
-    val dbFilePath = documentDirectory() + "/coffee_room.db"
+    val dbFilePath = documentDirectory() + "/" + CoffeeDatabase.DATABASE_NAME
     return Room.databaseBuilder<CoffeeDatabase>(
         name = dbFilePath,
     )

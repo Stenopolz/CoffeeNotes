@@ -1,8 +1,10 @@
 package domain
 
+import androidx.room.RoomRawQuery
 import data.Coffee
 import data.Recipe
 import database.CoffeeDao
+import database.CoffeeDatabase
 import database.CoffeeEntity
 import database.RecipeDao
 import database.RecipeEntity
@@ -18,12 +20,19 @@ interface CoffeeRepository {
     suspend fun addRecipe(recipe: Recipe): Recipe
     suspend fun updateRecipe(recipe: Recipe)
     suspend fun removeRecipe(recipe: Recipe)
+    suspend fun checkpoint()
+    suspend fun close()
+    suspend fun reinitialize()
 }
 
 class CoffeeRepositoryImpl(
-    private val coffeeDao: CoffeeDao,
-    private val recipeDao: RecipeDao,
+    private val getDatabase: () -> CoffeeDatabase
 ) : CoffeeRepository {
+
+    private var database = getDatabase()
+    private var coffeeDao: CoffeeDao = database.getCoffeeDao()
+    private var recipeDao: RecipeDao = database.getRecipeDao()
+
     override suspend fun getCoffeeList(): List<Coffee> {
         return coffeeDao.getAllCoffee().map { it.toAppData() }
     }
@@ -66,6 +75,20 @@ class CoffeeRepositoryImpl(
 
     override suspend fun removeRecipe(recipe: Recipe) {
         recipeDao.deleteRecipe(recipe.toEntity())
+    }
+
+    override suspend fun checkpoint() {
+        coffeeDao.checkpoint(RoomRawQuery("PRAGMA wal_checkpoint(TRUNCATE)"))
+    }
+
+    override suspend fun close() {
+        database.close()
+    }
+
+    override suspend fun reinitialize() {
+        database = getDatabase()
+        coffeeDao = database.getCoffeeDao()
+        recipeDao = database.getRecipeDao()
     }
 
     fun CoffeeEntity.toAppData(): Coffee {

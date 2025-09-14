@@ -1,22 +1,21 @@
 package di
 
-import ui.addcoffeescreen.AddCoffeeScreenModel
-import ui.addnewrecipescreen.AddNewRecipeScreenModel
 import androidx.room.RoomDatabase
-import ui.coffeedetailsscreen.CoffeeDetailsScreenModel
-import database.CoffeeDao
 import database.CoffeeDatabase
 import database.CoffeeDatabase.Companion.getCoffeeDatabase
-import database.RecipeDao
+import database.DatabaseBackupManager
 import domain.CoffeeRepository
 import domain.CoffeeRepositoryImpl
-import ui.homescreen.HomeScreenModel
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
+import ui.addcoffeescreen.AddCoffeeScreenModel
+import ui.addnewrecipescreen.AddNewRecipeScreenModel
+import ui.coffeedetailsscreen.CoffeeDetailsScreenModel
 import ui.editcoffeescreen.EditCoffeeScreenModel
 import ui.editrecipescreen.EditRecipeScreenModel
+import ui.homescreen.HomeScreenModel
 
 expect fun platformModule(): Module
 
@@ -26,32 +25,25 @@ fun initKoin(config: KoinAppDeclaration? = null) =
         modules(
             platformModule(),
             repositoryModule,
-            databaseModule,
             screenViewModels,
         )
     }
 
 val repositoryModule = module {
-    factory<CoffeeRepository> {
+    single<CoffeeRepository> {
         CoffeeRepositoryImpl(
-            coffeeDao = get(),
-            recipeDao = get()
+            getDatabase = { getCoffeeDatabase(get<RoomDatabase.Builder<CoffeeDatabase>>()) }
         )
     }
 }
 
-val databaseModule = module {
-    single<CoffeeDatabase> { getCoffeeDatabase(get<RoomDatabase.Builder<CoffeeDatabase>>()) }
-    single<CoffeeDao> {
-        get<CoffeeDatabase>().getCoffeeDao()
-    }
-    single<RecipeDao> {
-        get<CoffeeDatabase>().getRecipeDao()
-    }
-}
-
 val screenViewModels = module {
-    factory { HomeScreenModel(get()) }
+    factory {
+        HomeScreenModel(
+            repository = get(),
+            databaseBackupManager = get<DatabaseBackupManager>()
+        )
+    }
     factory { params ->
         CoffeeDetailsScreenModel(
             coffee = params.get(),

@@ -23,6 +23,10 @@ abstract class CoffeeDatabase : RoomDatabase() {
                 .setQueryCoroutineContext(Dispatchers.IO)
                 .build()
         }
+
+        const val DATABASE_NAME = "coffee_room.db"
+        const val COFFEE_TABLE_NAME = "coffee"
+        const val RECIPE_TABLE_NAME = "recipes"
     }
 }
 
