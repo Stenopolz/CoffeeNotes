@@ -11,5 +11,9 @@ actual fun platformModule() = module {
     single<RoomDatabase.Builder<CoffeeDatabase>> {
         getDatabaseBuilder()
     }
-    factory<DatabaseBackupManager> { DatabaseBackupManagerImpl() }
+    factory<DatabaseBackupManager> {
+        DatabaseBackupManagerImpl(
+            coffeeRepository = get(),
+        )
+    }
 }
