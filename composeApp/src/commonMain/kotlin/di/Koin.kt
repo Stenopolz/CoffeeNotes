@@ -4,6 +4,7 @@ import androidx.room.RoomDatabase
 import database.CoffeeDatabase
 import database.CoffeeDatabase.Companion.getCoffeeDatabase
 import database.DatabaseBackupManager
+import database.DatabaseBackupManagerImpl
 import domain.CoffeeRepository
 import domain.CoffeeRepositoryImpl
 import org.koin.core.context.startKoin
@@ -33,6 +34,12 @@ val repositoryModule = module {
     single<CoffeeRepository> {
         CoffeeRepositoryImpl(
             getDatabase = { getCoffeeDatabase(get<RoomDatabase.Builder<CoffeeDatabase>>()) }
+        )
+    }
+
+    single<DatabaseBackupManager> {
+        DatabaseBackupManagerImpl(
+            coffeeRepository = get()
         )
     }
 }

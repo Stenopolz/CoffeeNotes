@@ -60,8 +60,9 @@ class HomeScreenModel(
     fun importDatabase() {
         screenModelScope.launch {
             _isImporting.value = true
-            databaseBackupManager.importDatabase()
-            coffeeList.value = repository.getCoffeeList()
+            if (databaseBackupManager.importDatabase()) {
+                coffeeList.value = repository.getCoffeeList()
+            }
             _isImporting.value = false
         }
     }

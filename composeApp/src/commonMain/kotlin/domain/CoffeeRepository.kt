@@ -1,6 +1,7 @@
 package domain
 
 import androidx.room.RoomRawQuery
+import co.touchlab.kermit.Logger
 import data.Coffee
 import data.Recipe
 import database.CoffeeDao
@@ -86,12 +87,14 @@ class CoffeeRepositoryImpl(
     }
 
     override suspend fun reinitialize() {
+        Logger.e("Reinitializing database")
         database = getDatabase()
         coffeeDao = database.getCoffeeDao()
         recipeDao = database.getRecipeDao()
     }
 
     fun CoffeeEntity.toAppData(): Coffee {
+        Logger.e("Mapping CoffeeEntity to Coffee: $this")
         return Coffee(
             id = this.id,
             title = this.title,

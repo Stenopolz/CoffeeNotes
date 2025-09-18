@@ -50,6 +50,10 @@ kotlin {
             implementation(libs.androidx.sqlite.bundled)
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
+            implementation(libs.filekit.core)
+            implementation(libs.filekit.dialogs)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.kermit)
         }
     }
 }
