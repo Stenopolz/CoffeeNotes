@@ -17,6 +17,7 @@ import ui.coffeedetailsscreen.CoffeeDetailsScreenModel
 import ui.editcoffeescreen.EditCoffeeScreenModel
 import ui.editrecipescreen.EditRecipeScreenModel
 import ui.homescreen.HomeScreenModel
+import ui.settingsscreen.SettingsScreenModel
 
 expect fun platformModule(): Module
 
@@ -33,13 +34,15 @@ fun initKoin(config: KoinAppDeclaration? = null) =
 val repositoryModule = module {
     single<CoffeeRepository> {
         CoffeeRepositoryImpl(
-            getDatabase = { getCoffeeDatabase(get<RoomDatabase.Builder<CoffeeDatabase>>()) }
+            getDatabase = {
+                getCoffeeDatabase(get<RoomDatabase.Builder<CoffeeDatabase>>())
+            },
         )
     }
 
     single<DatabaseBackupManager> {
         DatabaseBackupManagerImpl(
-            coffeeRepository = get()
+            coffeeRepository = get(),
         )
     }
 }
@@ -48,7 +51,6 @@ val screenViewModels = module {
     factory {
         HomeScreenModel(
             repository = get(),
-            databaseBackupManager = get<DatabaseBackupManager>()
         )
     }
     factory { params ->
@@ -76,7 +78,7 @@ val screenViewModels = module {
             recipe = params.get(),
             repository = get(),
             navigateBack = params.get(),
-            navigateForward = params.get()
+            navigateForward = params.get(),
         )
     }
     factory { params ->
@@ -84,6 +86,13 @@ val screenViewModels = module {
             coffee = params.get(),
             repository = get(),
             navigateBack = params.get(),
+        )
+    }
+    factory { params ->
+        SettingsScreenModel(
+            databaseBackupManager = get(),
+            navigateBack = params.get(),
+            showMessage = params.get(),
         )
     }
 }

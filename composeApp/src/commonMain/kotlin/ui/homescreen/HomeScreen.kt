@@ -13,10 +13,8 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -41,6 +39,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import data.Coffee
 import ui.addcoffeescreen.AddCoffeeScreen
 import ui.coffeedetailsscreen.CoffeeDetailsScreen
+import ui.settingsscreen.SettingsScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 object HomeScreen : Screen {
@@ -48,8 +47,6 @@ object HomeScreen : Screen {
     override fun Content() {
         val screenModel = getScreenModel<HomeScreenModel>()
         val coffeeList by screenModel.getCoffee().collectAsState()
-        val isExporting by screenModel.isExporting.collectAsState()
-        val isImporting by screenModel.isImporting.collectAsState()
         val navigator = LocalNavigator.currentOrThrow
 
         LifecycleEffect(
@@ -59,12 +56,9 @@ object HomeScreen : Screen {
         MainContent(
             navigateToDetails = { navigator push CoffeeDetailsScreen(it) },
             navigateToAddNewCoffee = { navigator push AddCoffeeScreen() },
-            onExportDatabase = { screenModel.exportDatabase() },
-            onImportDatabase = { screenModel.importDatabase() },
+            navigateToSettings = { navigator push SettingsScreen() },
             screenModel = screenModel,
             coffeeList = coffeeList,
-            isExporting = isExporting,
-            isImporting = isImporting,
         )
     }
 
@@ -72,12 +66,9 @@ object HomeScreen : Screen {
     private fun MainContent(
         navigateToDetails: (Coffee) -> Unit,
         navigateToAddNewCoffee: () -> Unit,
-        onExportDatabase: () -> Unit,
-        onImportDatabase: () -> Unit,
+        navigateToSettings: () -> Unit,
         screenModel: HomeScreenModel,
         coffeeList: List<Coffee>,
-        isExporting: Boolean,
-        isImporting: Boolean,
     ) {
         Scaffold(
             topBar = {
@@ -90,30 +81,12 @@ object HomeScreen : Screen {
                     },
                     actions = {
                         IconButton(
-                            onClick = onImportDatabase,
-                            enabled = !isImporting
+                            onClick = navigateToSettings,
                         ) {
-                            if (isImporting) {
-                                CircularProgressIndicator()
-                            } else {
-                                Icon(
-                                    Icons.Filled.Upload,
-                                    contentDescription = "Import Database"
-                                )
-                            }
-                        }
-                        IconButton(
-                            onClick = onExportDatabase,
-                            enabled = !isExporting
-                        ) {
-                            if (isExporting) {
-                                CircularProgressIndicator()
-                            } else {
-                                Icon(
-                                    Icons.Filled.Download,
-                                    contentDescription = "Export Database"
-                                )
-                            }
+                            Icon(
+                                Icons.Filled.Settings,
+                                contentDescription = "Settings"
+                            )
                         }
                     }
                 )

@@ -24,6 +24,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.io.IOException
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -31,16 +32,15 @@ import kotlin.time.ExperimentalTime
 class DatabaseBackupManagerImpl(
     private val coffeeRepository: CoffeeRepository
 ) : DatabaseBackupManager {
-    override suspend fun exportDatabase(): Boolean = withContext(Dispatchers.IO) {
-        try {
+    override suspend fun exportDatabase(): Result<Unit> = runCatching {
+        withContext(Dispatchers.IO) {
             // Ensure all transactions are committed
             coffeeRepository.checkpoint()
 
             // Get the database file
-
             val dbFile = FileKit.databasesDir / CoffeeDatabase.DATABASE_NAME
             if (!dbFile.exists()) {
-                return@withContext false
+                throw IllegalStateException("Database file does not exist")
             }
 
             // Create a timestamped filename
@@ -65,110 +65,87 @@ class DatabaseBackupManagerImpl(
 
             // Show save dialog and save the database file
             saveDatabase(dbFile, exportFileName)
-
-        } catch (e: Exception) {
-            Logger.e("Export failed", e)
-            false
         }
     }
 
-    private suspend fun saveDatabase(sourceFile: PlatformFile, fileName: String): Boolean {
-        return try {
-            val saveFile =
-                FileKit.openFileSaver(suggestedName = fileName, extension = "db") ?: return false
+    private suspend fun saveDatabase(sourceFile: PlatformFile, fileName: String) {
+        val saveFile = FileKit.openFileSaver(suggestedName = fileName, extension = "db")
+            ?: throw IllegalStateException("File saving cancelled")
 
-            // Copy the database file to the selected location
-            sourceFile.copyTo(saveFile)
-            return sourceFile.size() == saveFile.size()
-        } catch (e: Exception) {
-            Logger.e("Export failed", e)
-            false
+        // Copy the database file to the selected location
+        sourceFile.copyTo(saveFile)
+
+        if (sourceFile.size() != saveFile.size()) {
+            throw IOException("File copy failed, size mismatch")
         }
     }
 
-    override suspend fun importDatabase(): Boolean = withContext(Dispatchers.IO) {
-        try {
+    override suspend fun importDatabase(): Result<Unit> = runCatching {
+        withContext(Dispatchers.IO) {
             // Show file picker and get selected file URI
             val selectedFile = FileKit.openFilePicker(
                 type = FileKitType.File("db")
-            ) ?: return@withContext false
+            ) ?: throw IllegalStateException("File selection cancelled")
 
             // Validate the selected file is a valid SQLite database
-            val tempFile = copyFileToTempFile(selectedFile) ?: return@withContext false
+            val tempFile = copyFileToTempFile(selectedFile)
 
             if (!isValidSQLiteDatabase(tempFile.path)) {
                 tempFile.delete()
-                return@withContext false
+                throw IllegalArgumentException("Selected file is not a valid database")
             }
 
             // Close database connections to allow file replacement
             coffeeRepository.close()
 
             // Replace the main database file
-            val success = replaceMainDatabase(tempFile)
+            replaceMainDatabase(tempFile)
 
             // Clean up temp file
             tempFile.delete()
 
-            // Reinitialize repository after database replacement
-            if (success) {
-                coffeeRepository.reinitialize()
-            }
-
-            success
-        } catch (e: Exception) {
-            Logger.e("Import failed", e)
-            false
+            // Reinitialize repository after database file manipulations
+            coffeeRepository.reinitialize()
         }
     }
 
-    private suspend fun copyFileToTempFile(original: PlatformFile): PlatformFile? {
-        return try {
-            val tempFile = FileKit.cacheDir / "temp_import_db_${timestampMilliseconds()}.db"
+    private suspend fun copyFileToTempFile(original: PlatformFile): PlatformFile {
+        val tempFile = FileKit.cacheDir / "temp_import_db_${timestampMilliseconds()}.db"
 
-            original.copyTo(tempFile)
+        original.copyTo(tempFile)
 
-            if (tempFile.exists() && tempFile.size() > 0) tempFile else null
-        } catch (e: Exception) {
-            Logger.e("Copy to temp file failed", e)
-            null
-        }
+        return if (tempFile.exists() && tempFile.size() > 0) tempFile
+        else throw IOException("Failed to copy to temp file")
     }
 
-    private suspend fun replaceMainDatabase(sourceFile: PlatformFile): Boolean {
-        return try {
-            val dbFile = FileKit.databasesDir / CoffeeDatabase.DATABASE_NAME
+    private suspend fun replaceMainDatabase(sourceFile: PlatformFile) {
+        val dbFile = FileKit.databasesDir / CoffeeDatabase.DATABASE_NAME
 
-            // Create backup of current database before replacement
-            val backupFile =
-                FileKit.databasesDir / "coffee_room_backup_${timestampMilliseconds()}.db"
+        // Create backup of current database before replacement
+        val backupFile =
+            FileKit.databasesDir / "coffee_room_backup_${timestampMilliseconds()}.db"
 
-            if (dbFile.exists()) {
-                dbFile.copyTo(backupFile)
+        if (dbFile.exists()) {
+            dbFile.copyTo(backupFile)
+        }
+
+        // Replace with new database file
+        sourceFile.copyTo(dbFile)
+
+        // Verify the replacement was successful
+        if (isValidSQLiteDatabase(dbFile.path)) {
+            // Clean up backup file after successful replacement
+            if (backupFile.exists()) {
+                backupFile.delete()
             }
-
-            // Replace with new database file
-            sourceFile.copyTo(dbFile)
-
-            // Verify the replacement was successful
-            if (isValidSQLiteDatabase(dbFile.path)) {
-                // Clean up backup file after successful replacement
-                if (backupFile.exists()) {
-                    backupFile.delete()
-                }
-                true
-            } else {
-                Logger.e("Restored database is not valid")
-                // Restore backup if replacement failed
-                if (backupFile.exists()) {
-                    backupFile.copyTo(dbFile)
-                    backupFile.delete()
-                }
-                false
+        } else {
+            Logger.e("Restored database is not valid")
+            // Restore backup if replacement failed
+            if (backupFile.exists()) {
+                backupFile.copyTo(dbFile)
+                backupFile.delete()
             }
-        } catch (e: Exception) {
-            Logger.e("Database replacement failed", e)
-            false
+            throw IOException("Database replacement failed, original restored")
         }
     }
 
@@ -177,28 +154,23 @@ class DatabaseBackupManagerImpl(
     }
 
     private fun isValidSQLiteDatabase(fileUrl: String): Boolean {
-        return try {
-            // Check if database can be opened and has expected tables
-            BundledSQLiteDriver().open(fileUrl).use { databaseConnection ->
-                val hasValidTables = databaseConnection
-                    .prepare("SELECT name FROM sqlite_master WHERE type='table'")
-                    .use { statement ->
-                        var foundCoffeeTable = false
-                        var foundRecipeTable = false
-                        while (statement.step()) {
-                            val tableName = statement.getText(0)
-                            when (tableName) {
-                                CoffeeDatabase.COFFEE_TABLE_NAME -> foundCoffeeTable = true
-                                CoffeeDatabase.RECIPE_TABLE_NAME -> foundRecipeTable = true
-                            }
+        // Check if database can be opened and has expected tables
+        return BundledSQLiteDriver().open(fileUrl).use { databaseConnection ->
+            val hasValidTables = databaseConnection
+                .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+                .use { statement ->
+                    var foundCoffeeTable = false
+                    var foundRecipeTable = false
+                    while (statement.step()) {
+                        val tableName = statement.getText(0)
+                        when (tableName) {
+                            CoffeeDatabase.COFFEE_TABLE_NAME -> foundCoffeeTable = true
+                            CoffeeDatabase.RECIPE_TABLE_NAME -> foundRecipeTable = true
                         }
-                        foundCoffeeTable && foundRecipeTable
                     }
-                hasValidTables
-            }
-        } catch (e: Exception) {
-            Logger.e("Database validation failed", e)
-            false
+                    foundCoffeeTable && foundRecipeTable
+                }
+            hasValidTables
         }
     }
 }

@@ -1,6 +1,6 @@
 package database
 
 interface DatabaseBackupManager {
-    suspend fun exportDatabase(): Boolean
-    suspend fun importDatabase(): Boolean
+    suspend fun exportDatabase(): Result<Unit>
+    suspend fun importDatabase(): Result<Unit>
 }

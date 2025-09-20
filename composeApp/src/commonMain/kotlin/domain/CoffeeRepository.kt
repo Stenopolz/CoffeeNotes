@@ -94,7 +94,6 @@ class CoffeeRepositoryImpl(
     }
 
     fun CoffeeEntity.toAppData(): Coffee {
-        Logger.e("Mapping CoffeeEntity to Coffee: $this")
         return Coffee(
             id = this.id,
             title = this.title,
